@@ -129,14 +129,32 @@ export const useMapLoanProduct = () => {
         "is-required-when-deposit-deduct",
         "Deposit percent must be greater than 0",
         function (value) {
-          const { isOverdue } = this.parent;
-          if (isOverdue) {
+          const { isDepositDeduct } = this.parent;
+          if (isDepositDeduct) {
             return value > 0;
           }
           return true;
         }
       ),
-    missAmount: yup.number().required("Miss amount is required"),
+    misNature: yup.string().required("Mis nature is required"),
+    misAmount: yup.number().required("Mis amount is required"),
+    secureDepositProduct: yup.string(),
+    maxAllow: yup
+      .number()
+      .nullable() // Allows maxAllow to be null when not required
+      .test(
+        "is-valid-range",
+        "Max allow must be between 20 and 100 when Secure deposit product is not empty",
+        function (value) {
+          const { secureDepositProduct } = this.parent;
+          if (secureDepositProduct && secureDepositProduct.length > 0) {
+            // maxAllow is required and must be in the range of 20-100
+            return value !== undefined && value >= 20 && value <= 100;
+          }
+          // If secureDepositProduct is empty, maxAllow is not required
+          return true;
+        }
+      ),
   });
 
   // loan product form
@@ -166,7 +184,10 @@ export const useMapLoanProduct = () => {
       isDepositDeduct: false,
       linkDepositProduct: "",
       depositPercent: 0,
-      missAmount: 0,
+      misNature: "fixed",
+      misAmount: 0,
+      secureDepositProduct: "",
+      maxAllow: 0,
     },
   });
 
@@ -190,7 +211,7 @@ export const useMapLoanProduct = () => {
       dur_unit: values.durationUnit,
       roi: values.rateOfInterest,
       is_overdue: values.isOverdue,
-      overdue_on: values.isOverdue ? values.overdueOn : "0",
+      overdue_on: values.isOverdue ? values.overdueOn : 0,
       overdue_count: values.isOverdue ? values.defaultCountOnOverdue : 0,
       overdue_rate: values.isOverdue ? values.overdueRate : 0,
       grace_days: values.graceDays,
@@ -201,8 +222,13 @@ export const useMapLoanProduct = () => {
       share_perc: values.isShareDeduct ? values.sharePercent : 0,
       is_deposit_ded: values.isDepositDeduct,
       deposit_perc: values.isDepositDeduct ? values.depositPercent : 0,
-      deposit_prod: values.isDepositDeduct ? values.linkDepositProduct : "0",
-      mis_amt: values.missAmount,
+      deposit_prod: values.isDepositDeduct ? values.linkDepositProduct : null,
+      mis_nature: values.misNature === "fixed" ? 0 : 1,
+      mis_amt: values.misAmount,
+      sec_prod_id: values.secureDepositProduct
+        ? values.secureDepositProduct
+        : null,
+      max_allow: values.maxAllow,
     };
     postMapLoanProductApiCall(data);
   };

@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const MapLoanProduct = ({
   loading,
@@ -618,13 +619,107 @@ const MapLoanProduct = ({
 
               <FormField
                 control={form.control}
-                name="missAmount"
+                name="misNature"
+                render={({ field }) => (
+                  <FormItem className=" self-end">
+                    <FormLabel>MIS Nature</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        className="flex gap-5 border border-input rounded-md py-3 px-3"
+                      >
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="fixed" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Is Fixed
+                          </FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="percent" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Is Percent
+                          </FormLabel>
+                        </FormItem>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="misAmount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Miss Percent</FormLabel>
+                    <FormLabel>
+                      MIS{" "}
+                      {form.getValues("misNature") === "fixed"
+                        ? "Amount"
+                        : "Percent"}
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Enter miss percent"
+                        type="number"
+                        disabled={disableForm}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="secureDepositProduct"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Secure Deposit Product</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={disableForm}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select deposit product" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {depositProductData
+                            .filter(
+                              (item) =>
+                                item.value !==
+                                form.getValues("linkDepositProduct")
+                            )
+                            .map(({ value, label }) => (
+                              <SelectItem key={value} value={value}>
+                                {label}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="maxAllow"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Maximum Allow (Percentage)</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter maximum allow"
                         type="number"
                         disabled={disableForm}
                         {...field}
